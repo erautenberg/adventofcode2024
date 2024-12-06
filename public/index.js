@@ -78,5 +78,5 @@ function makeHyperlink(title, location) {
   return list;
 }
 
-const DAYS_COMPLETED = 2;
+const DAYS_COMPLETED = 3;
 makeNavigation(DAYS_COMPLETED);
