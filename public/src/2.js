@@ -15,7 +15,7 @@ parseData(DAY2, (input) => {
 
   const timeString2 = `Day ${DAY2}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = getSafetyReportWithProblemDampener(formattedReports, 1, 3).filter(Boolean).length;
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay2);
@@ -49,4 +49,28 @@ const getSafetyReport = (reports, min, max) => {
     acc.push(checkSafety(curr, min, max));
     return acc;
   }, []);
-}
+};
+
+const getSafetyReportWithProblemDampener = (reports, min, max) => {
+  return reports.reduce((acc, curr) => {
+    let safe = checkSafety(curr, min, max);
+    if (!safe) {
+      safe = canBeMadeSafe(curr, min, max);
+    }
+    acc.push(safe);
+    return acc;
+  }, []);
+};
+
+const canBeMadeSafe = (report, min, max) => {
+  for (let i=0; i<report.length; i++) {
+    if (checkSafety(removeElement(report, i), min, max)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const removeElement = (report, element) => {
+  return [ ...report.slice(0, element), ...report.slice(element+1, report.length)];
+};
