@@ -15,7 +15,8 @@ parseData(DAY3, (input) => {
 
   const timeString2 = `Day ${DAY3}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const formattedInstructionsWithConditions = formatInstructionsWithConditions(input);
+  const part2 = getSumOfMultipliedInstructions(formattedInstructionsWithConditions);
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay3);
@@ -33,4 +34,20 @@ const formatInstructions = input => {
 
 const getSumOfMultipliedInstructions = instructions => {
   return instructions.reduce((acc, curr) => acc += (curr[0] * curr[1]), 0);
+};
+
+const formatInstructionsWithConditions = input => {
+  let enabled = true;
+  return input.reduce((instructions, line) => {
+    line.matchAll(/mul\((\d{1,3}),(\d{1,3})\)|(don't\(\))|(do\(\))/g).reduce((acc, curr) => {
+      if (enabled && curr[0] && curr[1]) {
+        instructions.push([parseInt(curr[1]), parseInt(curr[2])]);
+      } else if (curr[3]) {
+        enabled = false;
+      } else if (curr[4]) {
+        enabled = true;
+      }
+    }, []);
+    return instructions;
+  }, []);
 };
