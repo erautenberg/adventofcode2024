@@ -6,7 +6,7 @@ parseData(DAY${num}, (input) => {
 
   const timeStringData1 = \`Day \$\{DAY${num}\}, Data Setup Execution Time\`;
   console.time(timeStringData1);
-
+  // setup code here
   console.timeEnd(timeStringData1);
 
   const timeString1 = \`Day \$\{DAY${num}\}, Part 1 Execution Time\`;
