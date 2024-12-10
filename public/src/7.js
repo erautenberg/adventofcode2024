@@ -15,7 +15,7 @@ parseData(DAY7, (input) => {
 
   const timeString2 = `Day ${DAY7}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = sumAllValidEquations(equations, '+*|');
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay7);
@@ -29,23 +29,25 @@ const formatEquations = input => {
   }, []);
 };
 
-const sumAllValidEquations = equations => {
-  return equations.reduce((acc, curr) => checkIfValidOperators(curr) ? acc += curr[0] : acc, 0);
+const sumAllValidEquations = (equations, operators = '+*') => {
+  return equations.reduce((acc, curr) => checkIfValidOperators(curr, operators) ? acc += curr[0] : acc, 0);
 };
 
-const checkIfValidOperators = equation => {
-  return getAllCombos('*+', equation.length - 2).some(operators => {
+const checkIfValidOperators = (equation, operators) => {
+  return getAllCombos(operators, equation.length - 2).some(combo => {
     const result = equation.slice(1).reduce((acc, curr, i) => {
       if (i === 0) {
         acc = curr;
       } else {
-        switch (operators.charAt(i - 1)) {
+        switch (combo.charAt(i - 1)) {
           case '+':
             acc += curr;
             break;
           case '*':
             acc *= curr;
             break;
+          case '|':
+            acc = parseInt(`${acc}${curr}`);
         }
       }
       return acc;
