@@ -34,7 +34,13 @@ const sumAllValidEquations = (equations, operators = '+*') => {
 };
 
 const checkIfValidOperators = (equation, operators) => {
-  return getAllCombos(operators, equation.length - 2).some(combo => {
+  const length = equation.length - 2;
+  const operatorKey = `${operators},${length}`;
+  if (!COMBOS.has(operatorKey)) {
+    getAllCombos(operators, length, length);
+  }
+
+  return COMBOS.get(operatorKey).some(combo => {
     const result = equation.slice(1).reduce((acc, curr, i) => {
       if (i === 0) {
         acc = curr;
@@ -56,13 +62,15 @@ const checkIfValidOperators = (equation, operators) => {
   });
 };
 
-const getAllCombos = (operators, length, combos = [], prefix = '') => {
+const COMBOS = new Map();
+
+const getAllCombos = (operators, orignalLength, length, prefix = '') => {
   if (length == 0)  {
-    combos.push(prefix);
+    const operatorKey = `${operators},${orignalLength}`;
+    COMBOS.get(operatorKey) ? COMBOS.get(operatorKey).push(prefix) : COMBOS.set(operatorKey, [prefix]);
     return;
   }
   for (let i = 0; i < operators.length; ++i) {
-    getAllCombos(operators, length - 1, combos, prefix + operators[i]);
+    getAllCombos(operators, orignalLength, length - 1, prefix + operators[i]);
   }
-  return combos;
 }
