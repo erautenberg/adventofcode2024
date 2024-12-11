@@ -6,16 +6,17 @@ parseData(DAY10, (input) => {
   const timeStringData1 = `Day ${DAY10}, Data Setup Execution Time`;
   console.time(timeStringData1);
   const map = formatMap(input);
+  const sums = getTotalTrailScore(map);
   console.timeEnd(timeStringData1);
 
   const timeString1 = `Day ${DAY10}, Part 1 Execution Time`;
   console.time(timeString1);
-  const part1 = getTotalTrailScore(map);
+  const part1 = sums.totalScore;
   console.timeEnd(timeString1);
 
   const timeString2 = `Day ${DAY10}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = sums.totalRating;
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay10);
@@ -34,6 +35,15 @@ const formatMap = input => {
   }, { trailheads: [], map: [] });
 };
 
+const getTotalTrailScore = ({ map, trailheads }) => {
+  return trailheads.reduce((acc, curr) => {
+    const { scores, ratings } = buildTrail(map, curr);
+    acc.totalScore += scores.size;
+    acc.totalRating += ratings.size;
+    return acc;
+  }, { totalScore: 0, totalRating: 0 });
+};
+
 const OFFSETS = {
   up: [-1, 0],
   down: [1, 0],
@@ -41,14 +51,19 @@ const OFFSETS = {
   right: [0, 1]
 };
 
-const getTotalTrailScore = ({ map, trailheads }) => {
-  return trailheads.reduce((acc, curr) => acc += buildTrail(map, curr).size, 0);
-};
-
-const buildTrail = (map, trailhead, row = trailhead[0], col = trailhead[1], allTrails = new Set()) => {
+const buildTrail = (
+  map,
+  trailhead,
+  row = trailhead[0],
+  col = trailhead[1],
+  scores = new Set(),
+  ratings = new Set(),
+  currTrail = `${row},${col}`
+) => {
   const currVal = map[row][col];
   if (currVal === 9) {
-    allTrails.add(`${row},${col}`);
+    scores.add(`${row},${col}`);
+    ratings.add(`${currTrail} ${row},${col}`);
     return;
   }
 
@@ -58,9 +73,9 @@ const buildTrail = (map, trailhead, row = trailhead[0], col = trailhead[1], allT
     const rowOffset = row - r;
     const colOffset = col - c;
     if (map[rowOffset] && map[rowOffset][colOffset] === nextVal) {
-      buildTrail(map, trailhead, rowOffset, colOffset, allTrails);
+      buildTrail(map, trailhead, rowOffset, colOffset, scores, ratings, `${currTrail} ${row},${col}`);
     }
   }
 
-  return allTrails;
+  return { scores, ratings };
 };
