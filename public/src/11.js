@@ -10,12 +10,12 @@ parseData(DAY11, (input) => {
 
   const timeString1 = `Day ${DAY11}, Part 1 Execution Time`;
   console.time(timeString1);
-  const part1 = applyBlinks(stones, 25).length;
+  const part1 = getTotalStoneCount(stones, 25);
   console.timeEnd(timeString1);
 
   const timeString2 = `Day ${DAY11}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = getTotalStoneCount(stones, 75);
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay11);
@@ -26,29 +26,33 @@ const formatStones = input => {
   return input.split(' ').map(n => parseInt(n));
 }
 
-const applyRules = stones => {
-  return stones.reduce((acc, curr) => {
-    if (curr === 0) {
-      acc.push(1);
-    } else {
-      const currStr = curr.toString();
-      if (currStr.length % 2 === 0) {
-        const s1 = currStr.slice(0, currStr.length / 2);
-        const s2 = currStr.slice(currStr.length / 2, currStr.length);
-        acc.push(parseInt(s1), parseInt(s2));
-      }
-      else {
-        acc.push(curr * 2024);
-      }
-    }
-    return acc;
-  }, []);
-};
-
-const applyBlinks = (stones, blinks) => {
-  let newStones = [...stones];
-  for (let i=1; i<=blinks; i++) {
-    newStones = applyRules(newStones);
-  }
-  return newStones;
+const getTotalStoneCount = (stones, blinks) => {
+  return stones.reduce((acc, curr) => acc += getStoneCount(curr, blinks), 0);
 }
+
+const getStoneCount = (stone, blinks, stoneMap = new Map()) => {
+  const stoneKey = `${stone},${blinks}`;
+  if (stoneMap.get(stoneKey)) {
+    return stoneMap.get(stoneKey);
+  }
+
+  if (blinks === 0) {
+    count = 1;
+  } else if (stone === 0) {
+    count = getStoneCount(1, blinks - 1, stoneMap);
+  } else {
+    const stoneStr = stone.toString();
+    if (stoneStr.length % 2 === 0) {
+      const s1 = stoneStr.slice(0, stoneStr.length / 2);
+      const s2 = stoneStr.slice(stoneStr.length / 2, stoneStr.length);
+      count = getStoneCount(parseInt(s1), blinks - 1, stoneMap) +
+              getStoneCount(parseInt(s2), blinks - 1, stoneMap);
+    }
+    else {
+      count = getStoneCount(stone * 2024, blinks - 1, stoneMap);
+    }
+  }
+
+  stoneMap.set(stoneKey, count);
+  return count;
+};
