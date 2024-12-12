@@ -6,17 +6,17 @@ parseData(DAY12, (input) => {
   const timeStringData1 = `Day ${DAY12}, Data Setup Execution Time`;
   console.time(timeStringData1);
   const garden = formatGarden(input);
+  const regions = buildRegions(garden);
   console.timeEnd(timeStringData1);
 
   const timeString1 = `Day ${DAY12}, Part 1 Execution Time`;
   console.time(timeString1);
-  const regions = buildRegions(garden);
   const part1 = getTotalFencePrice(regions);
   console.timeEnd(timeString1);
 
   const timeString2 = `Day ${DAY12}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = getTotalFenceBulkPrice(regions);
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay12);
@@ -100,4 +100,116 @@ const getRegionFencePrice = region => {
 
 const getTotalFencePrice = regions => {
   return regions.values().reduce((acc, curr) => acc += getRegionFencePrice([...curr]), 0);
+}
+
+const getCorners = region => {
+  return region.reduce((acc, curr) => {
+    const [ row, col ] = convertPointStrToArr(curr);
+
+    // top left corner (top left, top, left all empty)
+    if (region.indexOf(`${row - 1},${col - 1}`) === -1 &&
+        region.indexOf(`${row - 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col - 1}`) === -1
+      ) {
+      acc++;
+    }
+
+    // top right corner (top right, top, right all empty)
+    if (region.indexOf(`${row - 1},${col + 1}`) === -1 &&
+        region.indexOf(`${row - 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col + 1}`) === -1
+      ) {
+      acc++;
+    }
+
+    // bottom left corner (bottom left, bottom, left all empty)
+    if (region.indexOf(`${row + 1},${col - 1}`) === -1 &&
+        region.indexOf(`${row + 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col - 1}`) === -1
+      ) {
+      acc++;
+    }
+
+    // bottom right corner (bottom right, top, right all empty)
+    if (region.indexOf(`${row + 1},${col + 1}`) === -1 &&
+        region.indexOf(`${row + 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col + 1}`) === -1
+      ) {
+      acc++;
+    }
+
+    // interior top left (top, left full, top left empty)
+    if (region.indexOf(`${row - 1},${col - 1}`) === -1 &&
+        region.indexOf(`${row - 1},${col}`) > -1 &&
+        region.indexOf(`${row},${col - 1}`) > -1
+    ) {
+      acc++;
+    }
+
+    // interior top right (top, right full, top right empty)
+    if (region.indexOf(`${row - 1},${col + 1}`) === -1 &&
+        region.indexOf(`${row - 1},${col}`) > -1 &&
+        region.indexOf(`${row},${col + 1}`) > -1
+    ) {
+      acc++;
+    }
+
+    // interior bottom left (bottom, left full, bottom left empty)
+    if (region.indexOf(`${row + 1},${col - 1}`) === -1 &&
+        region.indexOf(`${row + 1},${col}`) > -1 &&
+        region.indexOf(`${row},${col - 1}`) > -1
+    ) {
+      acc++;
+    }
+
+    // interior bottom right (bottom, right full, bottom right empty)
+    if (region.indexOf(`${row + 1},${col + 1}`) === -1 &&
+        region.indexOf(`${row + 1},${col}`) > -1 &&
+        region.indexOf(`${row},${col + 1}`) > -1
+    ) {
+      acc++;
+    }
+
+    // adjacent corners top left
+    if (region.indexOf(`${row - 1},${col - 1}`) > -1 &&
+        region.indexOf(`${row - 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col - 1}`) === -1
+    ) {
+      acc++;
+    }
+
+    // adjacent corners top right
+    if (region.indexOf(`${row - 1},${col + 1}`) > -1 &&
+        region.indexOf(`${row - 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col + 1}`) === -1
+    ) {
+      acc++;
+    }
+
+    // adjacent corners bottom left
+    if (region.indexOf(`${row + 1},${col - 1}`) > -1 &&
+        region.indexOf(`${row + 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col - 1}`) === -1
+    ) {
+      acc++;
+    }
+
+    // adjacent corners bottom right
+    if (region.indexOf(`${row + 1},${col + 1}`) > -1 &&
+        region.indexOf(`${row + 1},${col}`) === -1 &&
+        region.indexOf(`${row},${col + 1}`) === -1
+    ) {
+      acc++;
+    }
+
+    return acc;
+  }, 0);
+}
+
+const getRegionFenceBulkPrice = region => {
+  return region.length * getCorners(region);
+}
+
+const getTotalFenceBulkPrice = regions => {
+  return regions.values().reduce((acc, curr) => acc += getRegionFenceBulkPrice([...curr]), 0);
 }
