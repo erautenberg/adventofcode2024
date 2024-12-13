@@ -15,7 +15,7 @@ parseData(DAY13, (input) => {
 
   const timeString2 = `Day ${DAY13}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = getTotalTokenCostWithMod(machines);
+  const part2 = getTotalTokenCost(machines, 10000000000000);
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay13);
@@ -46,73 +46,22 @@ const formatMachines = input => {
   }, [ {} ]);
 };
 
-const getCheapestButtonPressCost = ({ a, b, prize }, bigNum) => {
-  const xOptions = getAllButtonPresses(a[0], b[0], prize[0]);
-  const yOptions = getAllButtonPresses(a[1], b[1], prize[1]);
-  const intersection = getIntersection(xOptions, yOptions);
-  if (intersection && intersection.length) {
-    let currCost = getCost(...intersection[0]);
-    intersection.slice(1).forEach(tokens => {
-      let cost = getCost(...tokens);
-      if (cost < currCost) {
-        currCost = cost;
-      }
-    });
-    return currCost;
-  } else {
-    return 0;
-  }
-};
-
 const getCost = (a, b) => {
   const tokenACost = 3;
   const tokenBCost = 1;
   return a * tokenACost + b * tokenBCost;
 }
 
-const getIntersection = (a, b) => {
-  return a.reduce((acc, curr) => {
-    b.forEach(comp => {
-      if (curr[0] === comp[0] && curr[1] === comp[1]) {
-        acc.push(curr);
-      }
-    });
-    return acc;
-  }, []);
-}
+const getTotalTokenCost = (machines, offset) => {
+  return machines.reduce((acc, curr) => acc += getLineIntersections(curr, offset), 0);
+};
 
-// Ax + By = C
-const getAllButtonPresses = (a, b, c) => {
-  const CAP = 100;
-  if (c === 0 || (a === 0 && b === 0)) {
-    return [];
-  }
-
-  if (a === 0) {
-    return [ [ 0, c / b ] ];
-  }
-  if (b === 0) {
-    return [ [ c / a, 0 ] ];
-  }
-
-  let options = [];
-  for (let x=0; x <= c && x <= CAP; x++) {
-    const y = (c - a * x) / b;
-    if (y > 0 && Number.isInteger(y)) {
-      options.push([x, y]);
-    }
-  }
-
-  return options;
-}
-
-const getLineIntersections = ({ a, b, prize }) => {
-  const modifiedPX = prize[0] + 10000000000000;
-  const modifiedPY = prize[1] + 10000000000000;
-
+const getLineIntersections = ({ a, b, prize }, offset = 0) => {
   // Math Help: https://www.youtube.com/watch?v=-5J-DAsWuJc
-  const aCount = (modifiedPX * b[1] - modifiedPY * b[0]) / (a[0] * b[1] - a[1] * b[0]);
-  const bCount = (modifiedPX - a[0] * aCount) / b[0];
+  const aCount =
+    ((prize[0] + offset) * b[1] - (prize[1] + offset) * b[0]) / (a[0] * b[1] - a[1] * b[0]);
+  const bCount =
+    ((prize[0] + offset) - a[0] * aCount) / b[0];
 
   if (Number.isInteger(aCount) && Number.isInteger(bCount)) {
     return getCost(aCount, bCount);
@@ -120,11 +69,3 @@ const getLineIntersections = ({ a, b, prize }) => {
 
   return 0;
 }
-
-const getTotalTokenCost = (machines) => {
-  return machines.reduce((acc, curr) => acc += getCheapestButtonPressCost(curr), 0);
-};
-
-const getTotalTokenCostWithMod = (machines) => {
-  return machines.reduce((acc, curr) => acc += getLineIntersections(curr), 0);
-};
