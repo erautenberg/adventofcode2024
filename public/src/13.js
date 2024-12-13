@@ -15,7 +15,7 @@ parseData(DAY13, (input) => {
 
   const timeString2 = `Day ${DAY13}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = getTotalTokenCostWithMod(machines);
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay13);
@@ -106,6 +106,25 @@ const getAllButtonPresses = (a, b, c) => {
   return options;
 }
 
+const getLineIntersections = ({ a, b, prize }) => {
+  const modifiedPX = prize[0] + 10000000000000;
+  const modifiedPY = prize[1] + 10000000000000;
+
+  // Math Help: https://www.youtube.com/watch?v=-5J-DAsWuJc
+  const aCount = (modifiedPX * b[1] - modifiedPY * b[0]) / (a[0] * b[1] - a[1] * b[0]);
+  const bCount = (modifiedPX - a[0] * aCount) / b[0];
+
+  if (Number.isInteger(aCount) && Number.isInteger(bCount)) {
+    return getCost(aCount, bCount);
+  }
+
+  return 0;
+}
+
 const getTotalTokenCost = (machines) => {
   return machines.reduce((acc, curr) => acc += getCheapestButtonPressCost(curr), 0);
+};
+
+const getTotalTokenCostWithMod = (machines) => {
+  return machines.reduce((acc, curr) => acc += getLineIntersections(curr), 0);
 };
