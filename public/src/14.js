@@ -15,7 +15,7 @@ parseData(DAY14, (input) => {
 
   const timeString2 = `Day ${DAY14}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = '7603 \n' + getChristmasRender(robots, 7603, 101, 103);
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay14);
@@ -100,7 +100,39 @@ const countQuadrantsAfterSeconds = (robots, seconds, w, h)  => {
   }, { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 });
 };
 
-const getSafetyFactor = (robots, seconds = 100, w = 11, h = 7)  => {
-  const quadrantCounts = countQuadrantsAfterSeconds(robots, seconds, w, h);
+const getSafetyFactor = (robots, seconds = 100, width = 11, height = 7)  => {
+  const quadrantCounts = countQuadrantsAfterSeconds(robots, seconds, width, height);
   return Object.keys(quadrantCounts).reduce((acc, curr) => acc *= quadrantCounts[curr], 1);
 };
+
+const findPattern = (final, width = 11, height = 7)  => {
+  const render = Array.from({ length: height }, () => Array.from({ length: width }, () => '.'));
+  final.forEach(({ x, y }) => render[y][x] = '|');
+  return render.some(curr => {
+    if (curr.join('').includes('||||||||||')) {
+      return true;
+    } else {
+      return false;
+    }
+  }, '');
+};
+
+const loopPictures = (robots, seconds = 100, width = 11, height = 7)  => {
+  for (let i=0; i<seconds; i++) {
+    const final = getFinalPositions(robots, i, width, height);
+    if (findPattern(final, width, height)) {
+      return i;
+    }
+  }
+  return -1;
+};
+
+const renderPicture = (final, seconds, width = 11, height = 7)  => {
+  const render = Array.from({ length: height }, () => Array.from({ length: width }, () => '.'));
+  final.forEach(({ x, y }) => render[y][x] = '|');
+  return render.reduce((acc, curr) => acc += curr.join('') + '\n', '');
+};
+
+const getChristmasRender = (robots, seconds = 7603, width, height) => {
+  return renderPicture(getFinalPositions(robots, seconds, width, height), seconds, width, height);
+}
