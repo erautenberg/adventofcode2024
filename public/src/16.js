@@ -6,17 +6,17 @@ parseData(DAY16, (input) => {
   const timeStringData1 = `Day ${DAY16}, Data Setup Execution Time`;
   console.time(timeStringData1);
   const formattedMaze = formatMaze(input);
-  console.log(formattedMaze);
+  const allPaths = getCheapestPaths(formattedMaze);
   console.timeEnd(timeStringData1);
 
   const timeString1 = `Day ${DAY16}, Part 1 Execution Time`;
   console.time(timeString1);
-  const part1 = getCheapestPath(formattedMaze);
+  const part1 = allPaths.cheapest;
   console.timeEnd(timeString1);
 
   const timeString2 = `Day ${DAY16}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = allPaths.cheapestPathsTiles.size;
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay16);
@@ -72,18 +72,24 @@ const getCounterClockwiseDir = dir => {
   };
 }
 
-const getCheapestPath = ({ maze, start, end }, startDir = 'right') => {
-  const costs = [ [0, start[0], start[1], startDir] ];
-  const visited = new Set([`${start[0]},${start[1]},${startDir}`]);
+const getCheapestPaths = ({ maze, start, end }, startDir = 'right') => {
+  const startKey = `${start[0]},${start[1]}`;
+  let costs = [ [0, start[0], start[1], startDir, [startKey]] ];
+  let visited = new Set([`${startKey},${startDir}`]);
+  let cheapestPathsTiles = new Set([startKey]);
+  let cheapest = undefined;
 
   while (costs.length) {
-    const [ cost, row, col, dir ] = costs.pop();
+    const [ cost, row, col, dir, path ] = costs.pop();
+    const currKey = `${row},${col}`;
 
-    if (row === end[0] && col === end[1]) {
-      return cost;
+    if (row === end[0] && col === end[1] && (!cheapest || cheapest >= cost)) {
+      path.push(currKey);
+      path.forEach(p => cheapestPathsTiles.add(p));
+      cheapest = cost;
     }
 
-    visited.add(`${row},${col},${dir}`);
+    visited.add(`${currKey},${dir}`);
 
     const [ rOffset, cOffset ] = OFFSETS[dir];
     const options = [
@@ -94,10 +100,12 @@ const getCheapestPath = ({ maze, start, end }, startDir = 'right') => {
 
     for (const [ costNext, rNext, cNext, dirNext ] of options) {
       if (maze[rNext][cNext] !== '#' && !visited.has(`${rNext},${cNext},${dirNext}`)) {
-        costs.push([ costNext, rNext, cNext, dirNext ]);
+        costs.push([ costNext, rNext, cNext, dirNext, [...path, `${row},${col}`] ]);
         // sort costs from largest to smallest cost so "pop" in next loop yileds next smallest cost
         costs.sort((a, b) => b[0] - a[0]);
       }
     }
   }
+
+  return { cheapest, cheapestPathsTiles };
 };
