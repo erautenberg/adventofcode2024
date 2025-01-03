@@ -10,12 +10,12 @@ parseData(DAY17, (input) => {
 
   const timeString1 = `Day ${DAY17}, Part 1 Execution Time`;
   console.time(timeString1);
-  const part1 = performOps(instr).join(',');
+  const part1 = getOutput(instr);
   console.timeEnd(timeString1);
 
   const timeString2 = `Day ${DAY17}, Part 2 Execution Time`;
   console.time(timeString2);
-  const part2 = '';
+  const part2 = getNewA(instr);
   console.timeEnd(timeString2);
 
   console.timeEnd(timeStringDay17);
@@ -36,7 +36,7 @@ const formatInstr = input => {
   }, { registers: {}, instructions: [] });
 };
 
-const performOps = ({ registers,  instructions }) => {
+const performOps = ({ registers, instructions }) => {
   let { a, b, c } = registers;
   let i = 0;
   let output = [];
@@ -98,4 +98,34 @@ const performOps = ({ registers,  instructions }) => {
   }
 
   return output;
+};
+
+const getOutput = instr => {
+  return performOps(instr).join(',');
+}
+
+const getNewA = ({ registers, instructions }) => {
+  const program = instructions.join(',');
+  let output = getOutput({ registers, instructions });
+
+  const skipBy8s = (a, i) => {
+    if (i === instructions.length) {
+      output = getOutput({ registers: { ...registers, a }, instructions });
+      return program === output ? a : false;
+    }
+
+    a *= 8;
+    for (let byte = 0; byte < 8; byte++) {
+      output = getOutput({ registers: { ...registers, a: a + byte }, instructions });
+      if (program.endsWith(output)) {
+        let newA = skipBy8s(a + byte, i + 1);
+        if (newA) {
+          return newA;
+        }
+      }
+    }
+    return false;
+  };
+
+  return skipBy8s(0, 0);
 };
